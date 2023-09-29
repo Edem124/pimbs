@@ -1,35 +1,49 @@
 <script setup>
-
+    import axios from 'axios';
     import { ref  } from 'vue';
     import { useRouter } from 'vue-router';
     const formData = ref({
-        name:'',
+      first_name:'',
+        last_name:'',
+        username: '',
         email: '',
         password: '',
-        term:false,
+        role:''
     });
     const errorMessages = ref({
-      name: '',
+      first_nameError: '',
+      last_nameError: '',
+      usernameError: '',
       emailError: '',
       passwordError: '',
-      term:''
+      role:''
     });
     const successMessage = ref(null);
     const router = useRouter();
 
     const submitForm = async () => {
-      const { name, email, password,term} = formData.value;
+      const { first_name, last_name, username, email, password,role } = formData.value;
       errorMessages.value = {
-        nameError: '',
+        first_nameError: '',
+        last_nameError: '',
+        usernameError: '',
         emailError: '',
         passwordError: '',
-        termError:'',
+        roleError:'',
       };
       let hasError = false;
       try {
-        
-        if (!name.trim()) {
-          errorMessages.value.nameError = 'name is required';
+       
+        if (!first_name.trim()) {
+          errorMessages.value.first_nameError = 'First Name is required';
+          hasError = true;
+        }
+        if (!last_name.trim()) {
+          errorMessages.value.last_nameError = 'Last Name is required';
+          hasError = true;
+        }
+        if (!username.trim()) {
+          errorMessages.value.usernameError = 'Username is required';
           hasError = true;
         }
         if (!email.trim()) {
@@ -40,18 +54,9 @@
           errorMessages.value.passwordError = 'Password is required';
           hasError = true;
         }
-        if (term == false) {
-          errorMessages.value.termError = 'You must accept our terms and conditions before register';
-          hasError = true;
-        }
-        console.log(formData);
-        formData.value= {
-          name: '',
-          email: '',
-          password: '',
-          term:false,
-        };
-        
+        const response = await axios.post('http://127.0.0.1:8000/api/users/', formData.value);
+        console.log(response.data);
+        router.push('/login');
       } catch (error) {
         console.log(error);
       }
@@ -73,15 +78,43 @@
                                     <div class="form-group">
                                         <!-- Label -->
                                         <label class="pb-1">
-                                            Your Name
+                                            Your First Name
                                         </label>
                                         <!-- Input group -->
                                         <div class="input-group input-group-merge">
                                             <div class="input-icon">
                                                 <span class="ti-user color-primary"></span>
                                             </div>
-                                            <input v-model="formData.name" name="name" id="name" type="text" class="form-control" placeholder="Enter your name">
-                                            <p v-if="errorMessages.nameError" class="text-red-500 text-sm">{{ errorMessages.nameError }}</p>
+                                            <input v-model="formData.first_name" name="first_name" id="first_name" type="text" class="form-control" placeholder="Enter your name">
+                                            <p v-if="errorMessages.first_nameError" class="text-red-500 text-sm">{{ errorMessages.first_nameError }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <!-- Label -->
+                                        <label class="pb-1">
+                                            YourLast Name
+                                        </label>
+                                        <!-- Input group -->
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-icon">
+                                                <span class="ti-user color-primary"></span>
+                                            </div>
+                                            <input v-model="formData.last_name" name="last_name" id="last_name" type="text" class="form-control" placeholder="Enter your name">
+                                            <p v-if="errorMessages.last_nameError" class="text-red-500 text-sm">{{ errorMessages.last_nameError }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <!-- Label -->
+                                        <label class="pb-1">
+                                            Your Username
+                                        </label>
+                                        <!-- Input group -->
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-icon">
+                                                <span class="ti-user color-primary"></span>
+                                            </div>
+                                            <input v-model="formData.username" name="username" id="username" type="text" class="form-control" placeholder="Enter your name">
+                                            <p v-if="errorMessages.usernameError" class="text-red-500 text-sm">{{ errorMessages.usernameError }}</p>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -114,6 +147,24 @@
                                             <p v-if="errorMessages.passwordError" class="text-red-500 text-sm">{{ errorMessages.passwordError }}</p>
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <!-- Label -->
+                                        <label class="pb-1">
+                                            Roles
+                                        </label>
+                                        <!-- Input group -->
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-icon">
+                                                <span class="ti-lock color-primary"></span>
+                                            </div>
+                                            <select name="roles" id="roles" v-model="formData.role" >
+                                                <option value="">Rôles</option>
+                                                <option value="utilisateur">Utilisateur</option>
+                                                <option value="Coach">Coach</option>
+                                                <option value="Entreprise">Entreprise</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
                                     <div class="my-4">
                                         <div class="custom-control custom-checkbox mb-3">
@@ -131,7 +182,7 @@
 
                             </div>
                             <div class="card-footer px-md-5 bg-transparent border-top"><small>Already have an acocunt?</small>
-                                <a href="login.html" class="small">Sign in</a>
+                                <router-link to="/login" class="small">Sign in</router-link>
                             </div>
                         </div>
                     </div>

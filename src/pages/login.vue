@@ -1,8 +1,58 @@
 <script setup>
-import headlog from '../components/headlog.vue';
+    import axios from 'axios';
+    import { ref } from 'vue';
+    import { useRouter } from 'vue-router';
+    const formData = ref({
+        email: '',
+        password: '',
+        
+    });
+    const errorMessages = ref({
+        emailError: '',
+        passwordError: '',
+        
+    });
+    const router = useRouter();
+
+    const submitForm = async () => {
+        const { email, password,  terms } = formData.value;
+        errorMessages.value.emailError = '';
+        errorMessages.value.passwordError = '';
+
+        try {
+            let hasError = false;
+            
+            if (!email.trim()) {
+                errorMessages.value.emailError = 'Email is required';
+                hasError = true;
+            }
+
+            if (!password.trim()) {
+                errorMessages.value.passwordError = 'Password is required';
+                hasError = true;
+            }
+            const response = await axios.post('http://127.0.0.1:8000/api-auth/login/', formData.value);
+
+            const { access_token } = response.data;
+            localStorage.setItem('token', access_token);
+            console.log(response.data);
+            formData.value= {
+                email: '',
+                password: '',
+                };
+            router.push('/');
+        } catch (error) {
+            // Si la connexion échoue, vous pouvez gérer l'erreur ici
+            if (error.response.status === 401) {
+            errorMessages.value.emailError = 'Email ou mot de passe incorrect';
+            } else {
+            console.error(error);
+            }
+        }
+    };
 </script>
 <template>
-<headlog/>
+
 <div class="main">
 
 <section class="gradient-overly-top ptb-100 height-lg-100vh d-flex align-items-center" style="background: url('../assets/img/hero-14.jpg')no-repeat center center / cover">
@@ -17,14 +67,14 @@ import headlog from '../components/headlog.vue';
                         </div>
 
                         <!--login form-->
-                        <form class="login-signup-form">
+                        <form class="login-signup-form" @submit.prevent="submitForm">
                             <div class="form-group">
                                 <label class="pb-1">Email Address</label>
                                 <div class="input-group input-group-merge">
                                     <div class="input-icon">
                                         <span class="ti-email color-primary"></span>
                                     </div>
-                                    <input type="email" class="form-control" placeholder="name@yourdomain.com">
+                                    <input v-model="formData.email" type="email" name="email" id="email" class="form-control" placeholder="name@yourdomain.com">
                                 </div>
                             </div>
                             <!-- Password -->
@@ -34,16 +84,16 @@ import headlog from '../components/headlog.vue';
                                         <label class="pb-1">Password</label>
                                     </div>
                                     <div class="col-auto">
-                                        <a href="recover-account.html" class="form-text small text-muted">
-                                            Forgot password?
-                                        </a>
+                                        <router-link to="/forgot" class="form-text small text-muted">
+                                             Forgot password?
+                                        </router-link>    
                                     </div>
                                 </div>
                                 <div class="input-group input-group-merge">
                                     <div class="input-icon">
                                         <span class="ti-lock color-primary"></span>
                                     </div>
-                                    <input type="password" class="form-control" placeholder="Enter your password">
+                                    <input type="password" class="form-control" placeholder="Enter your password" v-model="formData.password" id="password" name="password">
                                 </div>
                             </div>
 
